@@ -2,7 +2,7 @@
  * EduAI Platform — Client-Side Application Logic
  */
 
-const API = '';
+const API = 'https://onlineeducationplatform.up.railway.app';
 let currentUser = null;
 let currentConvId = null;
 let assignConvId = null;
