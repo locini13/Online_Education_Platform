@@ -2,7 +2,10 @@
  * EduAI Platform — Client-Side Application Logic
  */
 
-const API = 'https://onlineeducationplatform.up.railway.app';
+const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? ''
+    : 'https://onlineeducationplatform.up.railway.app';
+
 let currentUser = null;
 let currentConvId = null;
 let assignConvId = null;
@@ -212,7 +215,6 @@ function appendMessage(container, text, role, agentType) {
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
 
-    // Hide quick actions after first message
     const qa = container.parentElement.querySelector('.quick-actions');
     if (qa && role === 'user') qa.classList.add('hidden');
 }
@@ -238,25 +240,20 @@ function updateAgentBadge(type) {
     badge.className = 'chat-agent-badge badge-' + (type || 'course');
 }
 
-// ── Markdown Renderer (simple) ──
+// ── Markdown Renderer ──
 function renderMarkdown(text) {
     if (!text) return '';
     let html = escapeHtml(text);
-    // Code blocks
     html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-    // Bold & italic
     html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    // Headers
     html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
     html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
     html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-    // Lists
     html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
     html = html.replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>');
     html = html.replace(/((<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
-    // Line breaks
     html = html.replace(/\n/g, '<br>');
     return html;
 }
@@ -369,7 +366,6 @@ async function loadAdminStats() {
         if (!res.ok) return;
         const stats = await res.json();
 
-        // Stat cards
         document.getElementById('admin-stats').innerHTML = [
             {label:'Total Queries', value: stats.total_queries, icon:'📊'},
             {label:'Avg Response', value: stats.avg_response_time_ms+'ms', icon:'⏱️'},
@@ -387,7 +383,6 @@ async function loadAdminStats() {
             </div>
         `).join('');
 
-        // Agent chart
         const agents = stats.queries_by_agent || {};
         const maxAgent = Math.max(...Object.values(agents), 1);
         const colors = {course:'var(--accent-purple)', assignment:'var(--accent-teal)', technical:'var(--accent-blue)', escalation:'var(--accent-rose)'};
@@ -399,7 +394,6 @@ async function loadAdminStats() {
             </div>
         `).join('') || '<p style="color:var(--text-muted);font-size:13px">No data yet</p>';
 
-        // Response time chart
         const trend = (stats.response_time_trend || []).reverse();
         const maxTime = Math.max(...trend.map(t => t.avg_time || 0), 1);
         document.getElementById('chart-response').innerHTML = trend.map(t => `
@@ -410,7 +404,6 @@ async function loadAdminStats() {
             </div>
         `).join('') || '<p style="color:var(--text-muted);font-size:13px">No data yet</p>';
 
-        // Violations table
         const vBody = document.getElementById('violations-body');
         vBody.innerHTML = (stats.recent_violations || []).map(v => `
             <tr>
@@ -422,7 +415,6 @@ async function loadAdminStats() {
             </tr>
         `).join('') || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--text-muted)">No violations</td></tr>';
 
-        // Escalations table
         const eRes = await fetch(`${API}/api/admin/escalations`, {credentials:'include'});
         if (eRes.ok) {
             const eData = await eRes.json();
@@ -459,7 +451,7 @@ function showToast(msg, type = 'success') {
     setTimeout(() => toast.remove(), 3500);
 }
 
-// ── Init (check session) ──
+// ── Init ──
 (async function init() {
     try {
         const res = await fetch(`${API}/api/auth/me`, {credentials:'include'});
@@ -469,7 +461,6 @@ function showToast(msg, type = 'success') {
         }
     } catch(e) {}
 
-    // Enter key login
     document.getElementById('login-password').addEventListener('keydown', e => {
         if (e.key === 'Enter') handleLogin();
     });

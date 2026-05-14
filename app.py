@@ -1,20 +1,3 @@
-"""
-Flask API Server for the AI-Powered Online Education Platform.
-
-complete news
-
-Routes:
-- /                  → Serve the frontend SPA
-- /api/auth/login    → Student/Admin login
-- /api/auth/register → New student registration
-- /api/chat          → AI chat (orchestrator pipeline)
-- /api/conversations → Conversation history
-- /api/tickets       → Support tickets CRUD
-- /api/escalate      → Escalation requests
-- /api/admin/stats   → Admin dashboard analytics
-- /api/courses       → Course listing
-"""
-
 import os
 import json
 import hashlib
@@ -25,22 +8,28 @@ from flask import Flask, request, jsonify, send_from_directory, session
 from flask_cors import CORS
 from dotenv import load_dotenv
 
-# Load environment variables (override allows picking up .env changes without full restart)
 load_dotenv(override=True)
 
-# Initialize Flask
 app = Flask(__name__, static_folder="static", static_url_path="")
 app.secret_key = os.getenv("SECRET_KEY", "edu-platform-secret-key-2024")
-CORS(app, supports_credentials=True)
 
-# Initialize database
+CORS(app, supports_credentials=True, origins=[
+    "http://localhost:5000",
+    "http://127.0.0.1:5000",
+    "https://onlineeducationplatform.up.railway.app",
+    "https://online-education-platform.vercel.app"  # replace with your actual vercel url
+])
+
 from database.models import init_db, get_db, dict_from_row, dicts_from_rows
 from database.seed import seed_database
 from agents.orchestrator import Orchestrator
 from monitoring.tracker import tracker
 
-# Initialize the AI orchestrator
 orchestrator = Orchestrator()
+
+# Initialize database on startup (works with gunicorn)
+init_db()
+seed_database()
 
 
 # ── Helper Functions ──
@@ -103,7 +92,6 @@ def login():
     session["role"] = user_dict["role"]
     session["display_name"] = user_dict["display_name"]
 
-    # Update last login
     conn = get_db()
     conn.execute("UPDATE users SET last_login = ? WHERE id = ?",
                  (datetime.now().isoformat(), user_dict["id"]))
@@ -201,17 +189,14 @@ def chat():
     user_id = session["user_id"]
     context = []
 
-    # Get or create conversation
     conn = get_db()
     if conversation_id:
-        # Load conversation context
         messages = conn.execute(
             "SELECT role, content FROM messages WHERE conversation_id = ? ORDER BY created_at",
             (conversation_id,)
         ).fetchall()
         context = dicts_from_rows(messages)
     else:
-        # Create new conversation
         conn.execute(
             "INSERT INTO conversations (user_id, agent_type, title) VALUES (?, ?, ?)",
             (user_id, "orchestrator", query[:80])
@@ -219,7 +204,6 @@ def chat():
         conn.commit()
         conversation_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
 
-    # Save user message
     conn.execute(
         "INSERT INTO messages (conversation_id, role, content) VALUES (?, ?, ?)",
         (conversation_id, "user", query)
@@ -227,23 +211,18 @@ def chat():
     conn.commit()
     conn.close()
 
-    # Process through orchestrator
     result = orchestrator.process_query(query, user_id, context)
 
-    # Save AI response
     conn = get_db()
     conn.execute(
         "INSERT INTO messages (conversation_id, role, content, agent_type) VALUES (?, ?, ?, ?)",
         (conversation_id, "assistant", result["response"], result["agent_type"])
     )
-
-    # Update conversation agent type
     conn.execute(
         "UPDATE conversations SET agent_type = ?, updated_at = ? WHERE id = ?",
         (result["agent_type"], datetime.now().isoformat(), conversation_id)
     )
 
-    # Handle escalation
     if result.get("escalated"):
         conn.execute(
             "INSERT INTO escalations (conversation_id, user_id, reason, summary, priority) VALUES (?, ?, ?, ?, ?)",
@@ -376,7 +355,6 @@ def get_courses():
 def admin_stats():
     if session.get("role") not in ("admin", "faculty"):
         return jsonify({"error": "Admin access required"}), 403
-
     stats = tracker.get_dashboard_stats()
     return jsonify(stats)
 
@@ -412,10 +390,6 @@ def admin_violations():
 # ── Initialize & Run ──
 
 if __name__ == "__main__":
-    print("[*] Initializing Online Education Platform...")
-    init_db()
-    seed_database()
     print("[*] Starting server at http://localhost:5000")
     app.run(debug=True, host="0.0.0.0", port=5000)
-
 
