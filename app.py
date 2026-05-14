@@ -409,23 +409,11 @@ def admin_violations():
 
 # ── Initialize & Run ──
 
-import os
-
-app = Flask(__name__)
-
-def create_app():
-    print("[*] Initializing Online Education Platform...")
-
-    init_db()
-
-    if os.getenv("SEED_DB", "false").lower() == "true":
-        seed_database()
-
-    return app
-
-
-app = create_app()
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    print("[*] Initializing Online Education Platform...")
+    init_db()
+    seed_database()
+    print("[*] Starting server at http://localhost:5000")
+    app.run(debug=True, host="0.0.0.0", port=5000)
+
 
