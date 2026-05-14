@@ -39,6 +39,14 @@ The platform is configured via the `.env` file. You must provide valid API keys 
 ## DEMO
 https://drive.google.com/file/d/1gH8x10Ib_Wv-iE_KXvUsAvDI5ENBNOYC/view?usp=sharing
 
+#### Admin 
+<img width="1500" height="700" alt="image" src="https://github.com/user-attachments/assets/8689f5c3-9888-4e47-99d5-da5cc4e94a7d" />
+
+### Student 
+
+<img width="1700" height="700" alt="image" src="https://github.com/user-attachments/assets/334434c6-79a1-4730-9690-9d14d610a04d" />
+
+
 ## Deployment
 https://onlineeducationplatform.up.railway.app
 
