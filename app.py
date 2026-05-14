@@ -1,6 +1,8 @@
 """
 Flask API Server for the AI-Powered Online Education Platform.
 
+complete news
+
 Routes:
 - /                  → Serve the frontend SPA
 - /api/auth/login    → Student/Admin login
