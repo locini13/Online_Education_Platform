@@ -39,6 +39,9 @@ The platform is configured via the `.env` file. You must provide valid API keys 
 ## DEMO
 https://drive.google.com/file/d/1gH8x10Ib_Wv-iE_KXvUsAvDI5ENBNOYC/view?usp=sharing
 
+## Deployment
+https://onlineeducationplatform.up.railway.app
+
 ## Admin Features
 Admins can access a real-time dashboard at `/api/admin/stats` to monitor:
 - Total query volume and agent distribution
