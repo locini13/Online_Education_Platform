@@ -36,7 +36,10 @@ The platform is configured via the `.env` file. You must provide valid API keys 
 3. Run the application: `python app.py`
 4. Access the platform at `http://localhost:5000`
 
-## 👨‍💼 Admin Features
+## DEMO
+https://drive.google.com/file/d/1gH8x10Ib_Wv-iE_KXvUsAvDI5ENBNOYC/view?usp=sharing
+
+## Admin Features
 Admins can access a real-time dashboard at `/api/admin/stats` to monitor:
 - Total query volume and agent distribution
 - AI response times and escalation rates
