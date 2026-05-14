@@ -44,7 +44,7 @@ https://drive.google.com/file/d/1gH8x10Ib_Wv-iE_KXvUsAvDI5ENBNOYC/view?usp=shari
 
 ### Student 
 
-<img width="1700" height="700" alt="image" src="https://github.com/user-attachments/assets/334434c6-79a1-4730-9690-9d14d610a04d" />
+<img width="1700" height="1000" alt="image" src="https://github.com/user-attachments/assets/334434c6-79a1-4730-9690-9d14d610a04d" />
 
 
 ## Deployment
